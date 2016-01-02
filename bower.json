@@ -1,0 +1,25 @@
+{
+  "name": "folke-ko-infinite-scroll",
+  "authors": [
+    "Sidoine De Wispelaere <sidoine@sidoine.net>"
+  ],
+  "description": "Calls a method while an element is on screen",
+  "main": "infinite-scroll.js",
+  "moduleType": [
+    "amd"
+  ],
+  "keywords": [
+    "ko",
+    "infinite",
+    "scroll"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/folkelib/folke-ko-infinite-scroll",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
