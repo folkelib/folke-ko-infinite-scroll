@@ -1,4 +1,4 @@
-﻿/*Copyright (C) 2015 Sidoine De Wispelaere
+﻿/*Copyright (C) 2015-2016 Sidoine De Wispelaere
 
 Permission to use, copy, modify, and/or distribute this software for any
 purpose with or without fee is hereby granted, provided that the above
@@ -30,6 +30,8 @@ function isElementInViewport(el: HTMLElement) {
         || rect.left > vWidth || rect.top > vHeight)
         return false;
 
+    console.log(`${rect.left}, ${rect.top}`);
+
     // Return true if any of its four corners are visible
     return (
         (eap = efp(rect.left, rect.top)) == el || el[contains](eap) == has
@@ -41,22 +43,25 @@ function isElementInViewport(el: HTMLElement) {
 
 /** The elements that expands indefinitely. The value that is binded
 to the element must implements this interface. */
-export interface ScrollableValue {
+export interface ScrollableValue<T> extends KnockoutSubscribable<T> {
     /** The method to call when the element is on screen */
     loadNext();
 }
 
 export var handler:KnockoutBindingHandler = {
-    init: function (element: HTMLElement, valueAccessor: () => ScrollableValue, allBindingsAccessor) {
+    init: function (element: HTMLElement, valueAccessor: () => ScrollableValue<any>, allBindingsAccessor) {
         var array = valueAccessor();
         
         var isInViewPort = false;
 
         var checkIsInViewPort = function () {
             var isInViewPortNow = isElementInViewport(element);
+            console.log(`isInViewPort = ${isInViewPort}`);
+            console.log(`isInViewPortNow = ${isInViewPortNow}`);
             if (isInViewPort != isInViewPortNow) {
                 isInViewPort = isInViewPortNow;
                 if (isInViewPortNow) {
+                    console.log("loadNext");
                     array.loadNext();
                 }
             }
@@ -78,6 +83,11 @@ export var handler:KnockoutBindingHandler = {
         window.addEventListener('load', checkIsInViewPort);
         window.addEventListener('scroll', checkIsInViewPort);
         window.addEventListener('resize', checkIsInViewPort);
+        var handle = array.subscribe(newValue => {
+            // Force to refresh if still in view port (may not have any elements to push it out of the screen)
+            isInViewPort = false;
+            checkIsInViewPort();
+        });
         
         ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
             for (var ancestor of ancestors) {
@@ -87,6 +97,7 @@ export var handler:KnockoutBindingHandler = {
             window.removeEventListener('load', checkIsInViewPort);
             window.removeEventListener('resize', checkIsInViewPort);
             window.removeEventListener('scroll', checkIsInViewPort);
+            handle.dispose();
         });
     }
 }

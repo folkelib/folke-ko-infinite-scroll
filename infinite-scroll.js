@@ -1,4 +1,4 @@
-/*Copyright (C) 2015 Sidoine De Wispelaere
+/*Copyright (C) 2015-2016 Sidoine De Wispelaere
 
 Permission to use, copy, modify, and/or distribute this software for any
 purpose with or without fee is hereby granted, provided that the above
@@ -52,6 +52,11 @@ define(["require", "exports", 'knockout'], function (require, exports, ko) {
             window.addEventListener('load', checkIsInViewPort);
             window.addEventListener('scroll', checkIsInViewPort);
             window.addEventListener('resize', checkIsInViewPort);
+            var handle = array.subscribe(function (newValue) {
+                // Force to refresh if still in view port (may not have any elements to push it out of the screen)
+                isInViewPort = false;
+                checkIsInViewPort();
+            });
             ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
                 for (var _i = 0; _i < ancestors.length; _i++) {
                     var ancestor = ancestors[_i];
@@ -61,6 +66,7 @@ define(["require", "exports", 'knockout'], function (require, exports, ko) {
                 window.removeEventListener('load', checkIsInViewPort);
                 window.removeEventListener('resize', checkIsInViewPort);
                 window.removeEventListener('scroll', checkIsInViewPort);
+                handle.dispose();
             });
         }
     };
