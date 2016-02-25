@@ -30,8 +30,6 @@ function isElementInViewport(el: HTMLElement) {
         || rect.left > vWidth || rect.top > vHeight)
         return false;
 
-    console.log(`${rect.left}, ${rect.top}`);
-
     // Return true if any of its four corners are visible
     return (
         (eap = efp(rect.left, rect.top)) == el || el[contains](eap) == has
@@ -56,12 +54,9 @@ export var handler:KnockoutBindingHandler = {
 
         var checkIsInViewPort = function () {
             var isInViewPortNow = isElementInViewport(element);
-            console.log(`isInViewPort = ${isInViewPort}`);
-            console.log(`isInViewPortNow = ${isInViewPortNow}`);
             if (isInViewPort != isInViewPortNow) {
                 isInViewPort = isInViewPortNow;
                 if (isInViewPortNow) {
-                    console.log("loadNext");
                     array.loadNext();
                 }
             }
