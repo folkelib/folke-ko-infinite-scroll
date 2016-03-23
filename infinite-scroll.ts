@@ -12,7 +12,7 @@ WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
 OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.*/
 
-import ko = require('knockout');
+import * as ko from 'knockout';
 
 /** Checks if an element is in the viewport */
 function isElementInViewport(el: HTMLElement) {
@@ -97,6 +97,102 @@ export var handler:KnockoutBindingHandler = {
     }
 }
 
+
+export interface RequestParameters {
+    offset?: number;
+    limit?: number;
+}
+
+/**
+ * The options for a SearchArray
+ */
+export interface Options<T, TU extends RequestParameters> {
+    /**
+     * A method that is called to fetch more rows
+     * @param parameters The parameters for the request
+     * @returns {} A promise for the new rows
+     */
+    request: (parameters: TU) => Promise<T[]>;
+
+    parameters: TU;
+}
+
+/**
+ * A KnockoutObservableArray with methods to request more data
+ */
+export interface ScrollableArray<T, TU extends RequestParameters, TOptions extends Options<T, TU>> extends KnockoutObservableArray<T> {
+    options: TOptions;
+    
+    setOptions(options: TOptions);
+
+    refresh: () => Promise<T[]>;
+
+    updating: KnockoutObservable<boolean>
+    done: KnockoutObservable<boolean>
+
+    loadNext();
+}
+
+/**
+ * Creates an observable array with the SearchArray extensions
+ * @param options The options for the SearchArray
+ * @param value The initial values
+ */
+export function scrollableArray<T, TU extends RequestParameters>(options: Options<T, TU>, value?: T[]) {
+    return <ScrollableArray<T, TU, Options<T, TU>>>ko.observableArray(value).extend({ scrollableArray: options });
+}
+
+/**
+ * Describes an extension to an observable array that adds a method to load more data
+ * @param target The observable that is extended
+ * @param options The options
+ */
+export function scrollableArrayExtension<T, TU extends RequestParameters>(target: ScrollableArray<T, TU, Options<T, TU>>, options: Options<T, TU>) {
+    target.updating = ko.observable(false);
+    target.done = ko.observable(false);
+    target.setOptions = newOptions => {
+        target.options = newOptions;
+
+        function load(empty: boolean) {
+            target.options.parameters.offset = empty ? 0 : target().length;
+            return newOptions.request(target.options.parameters).then(values => {
+                // Set to false before updating the value because somebody may listen to the array and would want to add more elements
+                target.updating(false);
+                if (values.length < options.parameters.limit) {
+                    target.done(true);
+                }
+
+                if (empty) {
+                    target(values);
+                }
+                else if (values.length > 0) {
+                    ko.utils.arrayPushAll(target, values);
+                }
+
+                return values;
+            }, () => {
+                target.done(true);
+                target.updating(false);
+            });
+        };
+
+        target.refresh = () => {
+            target.updating(true);
+            target.done(false);
+            return load(true);
+        }
+
+        target.loadNext = () => {
+            if (target.updating() || target.done()) return;
+            target.updating(true);
+            load(false);
+        }
+    }
+    target.setOptions(options);
+};
+
+
 export function register() {
     ko.bindingHandlers['infiniteScroll'] = handler;
+    ko.extenders['scrollableArray'] = scrollableArrayExtension;
 }

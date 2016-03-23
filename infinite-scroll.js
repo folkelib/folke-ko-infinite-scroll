@@ -12,6 +12,7 @@ WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
 OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.*/
 define(["require", "exports", 'knockout'], function (require, exports, ko) {
+    "use strict";
     /** Checks if an element is in the viewport */
     function isElementInViewport(el) {
         var eap, rect = el.getBoundingClientRect(), docEl = document.documentElement, vWidth = window.innerWidth || docEl.clientWidth, vHeight = window.innerHeight || docEl.clientHeight, efp = function (x, y) { return document.elementFromPoint(x, y); }, contains = "contains" in el ? "contains" : "compareDocumentPosition", has = contains == "contains" ? 1 : 0x10;
@@ -58,8 +59,8 @@ define(["require", "exports", 'knockout'], function (require, exports, ko) {
                 checkIsInViewPort();
             });
             ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
-                for (var _i = 0; _i < ancestors.length; _i++) {
-                    var ancestor = ancestors[_i];
+                for (var _i = 0, ancestors_1 = ancestors; _i < ancestors_1.length; _i++) {
+                    var ancestor = ancestors_1[_i];
                     ancestor.removeEventListener('scroll', checkIsInViewPort);
                 }
                 document.removeEventListener('ready', checkIsInViewPort);
@@ -70,8 +71,65 @@ define(["require", "exports", 'knockout'], function (require, exports, ko) {
             });
         }
     };
+    /**
+     * Creates an observable array with the SearchArray extensions
+     * @param options The options for the SearchArray
+     * @param value The initial values
+     */
+    function scrollableArray(options, value) {
+        return ko.observableArray(value).extend({ scrollableArray: options });
+    }
+    exports.scrollableArray = scrollableArray;
+    /**
+     * Describes an extension to an observable array that adds a method to load more data
+     * @param target The observable that is extended
+     * @param options The options
+     */
+    function scrollableArrayExtension(target, options) {
+        target.updating = ko.observable(false);
+        target.done = ko.observable(false);
+        target.setOptions = function (newOptions) {
+            target.options = newOptions;
+            function load(empty) {
+                target.options.parameters.offset = empty ? 0 : target().length;
+                return newOptions.request(target.options.parameters).then(function (values) {
+                    // Set to false before updating the value because somebody may listen to the array and would want to add more elements
+                    target.updating(false);
+                    if (values.length < options.parameters.limit) {
+                        target.done(true);
+                    }
+                    if (empty) {
+                        target(values);
+                    }
+                    else if (values.length > 0) {
+                        ko.utils.arrayPushAll(target, values);
+                    }
+                    return values;
+                }, function () {
+                    target.done(true);
+                    target.updating(false);
+                });
+            }
+            ;
+            target.refresh = function () {
+                target.updating(true);
+                target.done(false);
+                return load(true);
+            };
+            target.loadNext = function () {
+                if (target.updating() || target.done())
+                    return;
+                target.updating(true);
+                load(false);
+            };
+        };
+        target.setOptions(options);
+    }
+    exports.scrollableArrayExtension = scrollableArrayExtension;
+    ;
     function register() {
         ko.bindingHandlers['infiniteScroll'] = exports.handler;
+        ko.extenders['scrollableArray'] = scrollableArrayExtension;
     }
     exports.register = register;
 });
