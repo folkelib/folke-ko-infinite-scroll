@@ -1,6 +1,6 @@
 {
   "name": "folke-ko-infinite-scroll",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Calls a method while an element is on screen",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
