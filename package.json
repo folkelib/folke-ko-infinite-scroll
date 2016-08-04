@@ -1,0 +1,30 @@
+{
+  "name": "folke-ko-infinite-scroll",
+  "version": "1.0.3",
+  "description": "Calls a method while an element is on screen",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepublish": "tsc -p ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/folkelib/folke-ko-infinite-scroll.git"
+  },
+  "keywords": [
+    "ko",
+    "infinite",
+    "scroll"
+  ],
+  "author": "Sidoine De Wispelaere",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/folkelib/folke-ko-infinite-scroll/issues"
+  },
+  "homepage": "https://github.com/folkelib/folke-ko-infinite-scroll#readme",
+  "dependencies": {
+    "knockout": "^3.4.0",
+    "es6-promise": "^3.2.1"
+  }
+}

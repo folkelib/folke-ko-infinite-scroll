@@ -13,6 +13,7 @@ OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.*/
 
 import * as ko from 'knockout';
+import * as promise from 'es6-promise';
 
 /** Checks if an element is in the viewport */
 function isElementInViewport(el: HTMLElement) {
@@ -41,12 +42,12 @@ function isElementInViewport(el: HTMLElement) {
 
 /** The elements that expands indefinitely. The value that is binded
 to the element must implements this interface. */
-export interface ScrollableValue<T> extends KnockoutSubscribable<T> {
+export interface ScrollableValue<T> extends ko.Subscribable<T> {
     /** The method to call when the element is on screen */
     loadNext();
 }
 
-export var handler:KnockoutBindingHandler = {
+export var handler:ko.BindingHandler = {
     init: function (element: HTMLElement, valueAccessor: () => ScrollableValue<any>, allBindingsAccessor) {
         var array = valueAccessor();
         
@@ -112,7 +113,7 @@ export interface Options<T, TU extends RequestParameters> {
      * @param parameters The parameters for the request
      * @returns {} A promise for the new rows
      */
-    request: (parameters: TU) => Promise<T[]>;
+    request: (parameters: TU) => promise.Promise<T[]>;
 
     parameters: TU;
 }
@@ -120,15 +121,15 @@ export interface Options<T, TU extends RequestParameters> {
 /**
  * A KnockoutObservableArray with methods to request more data
  */
-export interface ScrollableArray<T, TU extends RequestParameters, TOptions extends Options<T, TU>> extends KnockoutObservableArray<T> {
+export interface ScrollableArray<T, TU extends RequestParameters, TOptions extends Options<T, TU>> extends ko.ObservableArray<T> {
     options: TOptions;
     
     setOptions(options: TOptions);
 
-    refresh: () => Promise<T[]>;
+    refresh: () => promise.Promise<T[]>;
 
-    updating: KnockoutObservable<boolean>
-    done: KnockoutObservable<boolean>
+    updating: ko.Observable<boolean>
+    done: ko.Observable<boolean>
 
     loadNext();
 }
