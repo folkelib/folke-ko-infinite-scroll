@@ -24,7 +24,6 @@
   },
   "homepage": "https://github.com/folkelib/folke-ko-infinite-scroll#readme",
   "dependencies": {
-    "knockout": "^3.4.0",
-    "es6-promise": "^3.2.1"
+    "knockout": "^3.4.0"
   }
 }

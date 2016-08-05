@@ -13,7 +13,6 @@ OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.*/
 
 import * as ko from 'knockout';
-import * as promise from 'es6-promise';
 
 /** Checks if an element is in the viewport */
 function isElementInViewport(el: HTMLElement) {
@@ -113,7 +112,7 @@ export interface Options<T, TU extends RequestParameters> {
      * @param parameters The parameters for the request
      * @returns {} A promise for the new rows
      */
-    request: (parameters: TU) => promise.Promise<T[]>;
+    request: (parameters: TU) => Promise<T[]>;
 
     parameters: TU;
 }
@@ -126,7 +125,7 @@ export interface ScrollableArray<T, TU extends RequestParameters, TOptions exten
     
     setOptions(options: TOptions);
 
-    refresh: () => promise.Promise<T[]>;
+    refresh: () => Promise<T[]>;
 
     updating: ko.Observable<boolean>
     done: ko.Observable<boolean>

@@ -1,5 +1,4 @@
 import * as ko from 'knockout';
-import * as promise from 'es6-promise';
 /** The elements that expands indefinitely. The value that is binded
 to the element must implements this interface. */
 export interface ScrollableValue<T> extends ko.Subscribable<T> {
@@ -20,7 +19,7 @@ export interface Options<T, TU extends RequestParameters> {
      * @param parameters The parameters for the request
      * @returns {} A promise for the new rows
      */
-    request: (parameters: TU) => promise.Promise<T[]>;
+    request: (parameters: TU) => Promise<T[]>;
     parameters: TU;
 }
 /**
@@ -29,7 +28,7 @@ export interface Options<T, TU extends RequestParameters> {
 export interface ScrollableArray<T, TU extends RequestParameters, TOptions extends Options<T, TU>> extends ko.ObservableArray<T> {
     options: TOptions;
     setOptions(options: TOptions): any;
-    refresh: () => promise.Promise<T[]>;
+    refresh: () => Promise<T[]>;
     updating: ko.Observable<boolean>;
     done: ko.Observable<boolean>;
     loadNext(): any;

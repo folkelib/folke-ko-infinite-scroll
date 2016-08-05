@@ -1,7 +1,9 @@
 {
   "name": "folke-ko-infinite-scroll",
   "dependencies": {
-    "es6-promise": "registry:npm/es6-promise#3.0.0+20160723033700",
     "knockout": "registry:npm/knockout#3.4.0+20160516171930"
+  },
+  "globalDependencies": {
+    "promise": "github:Sidoine/promise"
   }
 }
