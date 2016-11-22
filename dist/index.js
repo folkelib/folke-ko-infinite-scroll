@@ -12,19 +12,25 @@ WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
 OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.*/
 "use strict";
-var ko = require('knockout');
+var ko = require("knockout");
 /** Checks if an element is in the viewport */
 function isElementInViewport(el) {
-    var eap, rect = el.getBoundingClientRect(), docEl = document.documentElement, vWidth = window.innerWidth || docEl.clientWidth, vHeight = window.innerHeight || docEl.clientHeight, efp = function (x, y) { return document.elementFromPoint(x, y); }, contains = "contains" in el ? "contains" : "compareDocumentPosition", has = contains == "contains" ? 1 : 0x10;
+    var eap;
+    var rect = el.getBoundingClientRect();
+    var docEl = document.documentElement;
+    var vWidth = window.innerWidth || docEl.clientWidth;
+    var vHeight = window.innerHeight || docEl.clientHeight;
+    var efp = function (x, y) { return document.elementFromPoint(x, y); };
+    var contains = el.contains ? (function (node) { return el.contains(node); }) : (function (node) { return el.compareDocumentPosition(node) == 0x10; });
     // Return false if it's not in the viewport
     if (rect.right < 0 || rect.bottom < 0
         || rect.left > vWidth || rect.top > vHeight)
         return false;
     // Return true if any of its four corners are visible
-    return ((eap = efp(rect.left, rect.top)) == el || el[contains](eap) == has
-        || (eap = efp(rect.right, rect.top)) == el || el[contains](eap) == has
-        || (eap = efp(rect.right, rect.bottom)) == el || el[contains](eap) == has
-        || (eap = efp(rect.left, rect.bottom)) == el || el[contains](eap) == has);
+    return ((eap = efp(rect.left, rect.top)) == el || contains(eap)
+        || (eap = efp(rect.right, rect.top)) == el || contains(eap)
+        || (eap = efp(rect.right, rect.bottom)) == el || contains(eap)
+        || (eap = efp(rect.left, rect.bottom)) == el || contains(eap));
 }
 exports.handler = {
     init: function (element, valueAccessor, allBindingsAccessor) {

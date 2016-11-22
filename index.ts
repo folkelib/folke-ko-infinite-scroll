@@ -16,14 +16,13 @@ import * as ko from 'knockout';
 
 /** Checks if an element is in the viewport */
 function isElementInViewport(el: HTMLElement) {
-    var eap,
-        rect = el.getBoundingClientRect(),
-        docEl = document.documentElement,
-        vWidth = window.innerWidth || docEl.clientWidth,
-        vHeight = window.innerHeight || docEl.clientHeight,
-        efp = (x: number, y: number) => document.elementFromPoint(x, y),
-        contains = "contains" in el ? "contains" : "compareDocumentPosition",
-        has = contains == "contains" ? 1 : 0x10;
+    let eap:Element;
+    const rect = el.getBoundingClientRect();
+    const docEl = document.documentElement;
+    const vWidth = window.innerWidth || docEl.clientWidth;
+    const vHeight = window.innerHeight || docEl.clientHeight;
+    const efp = (x: number, y: number) => document.elementFromPoint(x, y);
+    const contains = el.contains ?((node:Element) => el.contains(node)) : ((node:Element) => el.compareDocumentPosition(node) == 0x10);
 
     // Return false if it's not in the viewport
     if (rect.right < 0 || rect.bottom < 0
@@ -32,21 +31,21 @@ function isElementInViewport(el: HTMLElement) {
 
     // Return true if any of its four corners are visible
     return (
-        (eap = efp(rect.left, rect.top)) == el || el[contains](eap) == has
-        || (eap = efp(rect.right, rect.top)) == el || el[contains](eap) == has
-        || (eap = efp(rect.right, rect.bottom)) == el || el[contains](eap) == has
-        || (eap = efp(rect.left, rect.bottom)) == el || el[contains](eap) == has
+        (eap = efp(rect.left, rect.top)) == el || contains(eap)
+        || (eap = efp(rect.right, rect.top)) == el || contains(eap)
+        || (eap = efp(rect.right, rect.bottom)) == el || contains(eap)
+        || (eap = efp(rect.left, rect.bottom)) == el || contains(eap)
         );
 }
 
 /** The elements that expands indefinitely. The value that is binded
 to the element must implements this interface. */
-export interface ScrollableValue<T> extends ko.Subscribable<T> {
+export interface ScrollableValue<T> extends KnockoutSubscribable<T> {
     /** The method to call when the element is on screen */
-    loadNext();
+    loadNext():void;
 }
 
-export var handler:ko.BindingHandler = {
+export var handler:KnockoutBindingHandler = {
     init: function (element: HTMLElement, valueAccessor: () => ScrollableValue<any>, allBindingsAccessor) {
         var array = valueAccessor();
         
@@ -120,17 +119,17 @@ export interface Options<T, TU extends RequestParameters> {
 /**
  * A KnockoutObservableArray with methods to request more data
  */
-export interface ScrollableArray<T, TU extends RequestParameters, TOptions extends Options<T, TU>> extends ko.ObservableArray<T> {
+export interface ScrollableArray<T, TU extends RequestParameters, TOptions extends Options<T, TU>> extends KnockoutObservableArray<T> {
     options: TOptions;
     
-    setOptions(options: TOptions);
+    setOptions(options: TOptions):void;
 
     refresh: () => Promise<T[]>;
 
-    updating: ko.Observable<boolean>
-    done: ko.Observable<boolean>
+    updating: KnockoutObservable<boolean>
+    done: KnockoutObservable<boolean>
 
-    loadNext();
+    loadNext():void;
 }
 
 /**
@@ -166,7 +165,7 @@ export function scrollableArrayExtension<T, TU extends RequestParameters>(target
                     target(values);
                 }
                 else if (values.length > 0) {
-                    ko.utils.arrayPushAll(target, values);
+                    ko.utils.arrayPushAll<T>(target, values);
                 }
 
                 return values;
@@ -191,6 +190,9 @@ export function scrollableArrayExtension<T, TU extends RequestParameters>(target
     target.setOptions(options);
 };
 
+declare interface KnockoutExtenders {
+    scrollableArray<T, TU extends RequestParameters>(target: ScrollableArray<T, TU, Options<T, TU>>, options: Options<T, TU>):void;
+}
 
 export function register() {
     ko.bindingHandlers['infiniteScroll'] = handler;
