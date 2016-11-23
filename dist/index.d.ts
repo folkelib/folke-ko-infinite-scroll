@@ -45,4 +45,10 @@ export declare function scrollableArray<T, TU extends RequestParameters>(options
  * @param options The options
  */
 export declare function scrollableArrayExtension<T, TU extends RequestParameters>(target: ScrollableArray<T, TU, Options<T, TU>>, options: Options<T, TU>): void;
+declare global  {
+    interface KnockoutExtenders {
+        scrollableArray<T, TU extends RequestParameters>(target: ScrollableArray<T, TU, Options<T, TU>>, options: Options<T, TU>): void;
+    }
+}
 export declare function register(): void;
+export {};

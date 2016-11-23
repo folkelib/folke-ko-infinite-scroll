@@ -190,8 +190,10 @@ export function scrollableArrayExtension<T, TU extends RequestParameters>(target
     target.setOptions(options);
 };
 
-declare interface KnockoutExtenders {
-    scrollableArray<T, TU extends RequestParameters>(target: ScrollableArray<T, TU, Options<T, TU>>, options: Options<T, TU>):void;
+declare global {
+    interface KnockoutExtenders {
+        scrollableArray<T, TU extends RequestParameters>(target: ScrollableArray<T, TU, Options<T, TU>>, options: Options<T, TU>):void;
+    }
 }
 
 export function register() {
